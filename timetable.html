@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECE Section-A · Timetable</title>
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg1: #0b0e1a;
+  --bg2: #111827;
+  --surface: rgba(255,255,255,0.04);
+  --surface2: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.10);
+  --border2: rgba(255,255,255,0.16);
+  --txt: #f1f5f9;
+  --txt2: #94a3b8;
+  --txt3: #64748b;
+  --accent: #6366f1;
+  --accent2: #8b5cf6;
+
+  /* Subject palette */
+  --emf:  #10b981;
+  --dsp:  #6366f1;
+  --adc:  #f59e0b;
+  --dc:   #ef4444;
+  --java: #ec4899;
+  --mpmc: #0ea5e9;
+  --lab:  #a855f7;
+  --oth:  #475569;
+  --act:  #f97316;
+}
+
+html, body {
+  min-height: 100vh;
+  background: var(--bg1);
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--txt);
+}
+
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(99,102,241,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139,92,246,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 50% 50%, rgba(14,165,233,0.05) 0%, transparent 60%),
+    linear-gradient(180deg, #0b0e1a 0%, #0d1022 50%, #0b0e1a 100%);
+  min-height: 100vh;
+  padding: 0 0 60px;
+}
+
+/* ── Grid Lines Background ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Top Header Bar ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11,14,26,0.82);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 0 16px rgba(99,102,241,0.35);
+}
+
+.app-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--txt);
+  letter-spacing: -0.3px;
+}
+.app-name span {
+  color: var(--txt3);
+  font-weight: 400;
+  font-size: 13px;
+  margin-left: 6px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.clock-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  padding: 6px 16px 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--txt);
+  letter-spacing: 0.2px;
+}
+
+.clock-dot {
+  width: 7px; height: 7px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: livePulse 2s ease infinite;
+  flex-shrink: 0;
+}
+@keyframes livePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); opacity:1; }
+  50%     { box-shadow: 0 0 0 4px rgba(34,197,94,0); opacity:0.8; }
+}
+
+#topdate {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--txt3);
+}
+
+/* ── Page Body ── */
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 36px 24px 0;
+}
+
+/* ── Page Header ── */
+.page-header {
+  margin-bottom: 32px;
+  animation: fadeDown 0.6s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+@keyframes fadeDown {
+  from { opacity:0; transform:translateY(-16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--txt3);
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+.breadcrumb span { color: var(--txt2); }
+.breadcrumb .sep { color: var(--txt3); }
+
+.page-title {
+  font-family: 'Sora', sans-serif;
+  font-size: clamp(22px, 3.5vw, 34px);
+  font-weight: 800;
+  color: var(--txt);
+  letter-spacing: -0.8px;
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.badge-dept {
+  font-size: 11px;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
+  border: 1px solid rgba(99,102,241,0.35);
+  color: #a5b4fc;
+  border-radius: 6px;
+  padding: 3px 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.page-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--txt3);
+}
+.meta-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--txt3); }
+
+/* Today highlight banner */
+.today-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(251,191,36,0.07);
+  border: 1px solid rgba(251,191,36,0.18);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(251,191,36,0.9);
+  margin-top: 14px;
+  width: fit-content;
+  animation: fadeDown 0.7s cubic-bezier(0.22,1,0.36,1) both 0.1s;
+}
+.today-banner .today-icon { font-size: 14px; }
+
+
+
+/* ── Timetable Container ── */
+.tt-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.05) inset,
+    0 24px 64px rgba(0,0,0,0.3);
+  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) both 0.2s;
+  position: relative;
+}
+
+.tt-container::before {
+  content:'';
+  position:absolute;
+  top:0; left:8%; right:8%; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+  pointer-events:none;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* Table toolbar */
+.tt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.025);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tt-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--txt2);
+}
+
+.tt-toolbar-right {
+  display: flex;
+  gap: 6px;
+}
+
+.chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--txt3);
+  letter-spacing: 0.3px;
+}
+
+/* ── The Table ── */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.table-scroll::-webkit-scrollbar { height: 5px; }
+.table-scroll::-webkit-scrollbar-track { background: var(--bg1); }
+.table-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius:4px; }
+.table-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+  table-layout: fixed;
+}
+
+/* ── Header Row ── */
+thead tr {
+  background: rgba(255,255,255,0.03);
+}
+
+thead th {
+  padding: 0;
+  border-right: 1px solid var(--border);
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+}
+
+thead th:last-child { border-right: none; }
+
+.th-inner {
+  padding: 14px 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.th-day-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--txt3);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.th-period-num {
+  font-family: 'Sora', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--txt2);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.th-period-time {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--txt3);
+  letter-spacing: 0.2px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* Color accent bar on each period header */
+thead th:nth-child(2) .th-period-num { color: #818cf8; }
+thead th:nth-child(3) .th-period-num { color: #a78bfa; }
+thead th:nth-child(4) .th-period-num { color: #38bdf8; }
+thead th:nth-child(5) .th-period-num { color: #34d399; }
+thead th:nth-child(6) .th-period-num { color: #fbbf24; }
+thead th:nth-child(7) .th-period-num { color: #f472b6; }
+thead th:nth-child(8) .th-period-num { color: #2dd4bf; }
+
+/* ── Body Rows ── */
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.015); }
+
+/* Today row */
+tbody tr.today {
+  background: rgba(99,102,241,0.04);
+}
+tbody tr.today td.day-cell {
+  border-left: 3px solid #6366f1;
+}
+
+/* ── Day Column Cell ── */
+td.day-cell {
+  border-right: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  padding: 0;
+  vertical-align: middle;
+  transition: border-color 0.2s ease;
+}
+
+.day-inner {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.day-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt);
+  letter-spacing: -0.2px;
+}
+
+.day-short {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--txt3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── Subject Cells ── */
+td.sub {
+  border-right: 1px solid var(--border);
+  padding: 8px 6px;
+  text-align: center;
+  vertical-align: middle;
+  cursor: default;
+  transition: background 0.18s ease;
+  position: relative;
+}
+td.sub:last-child { border-right: none; }
+td.sub:hover .sub-inner { transform: scale(1.04); box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+
+/* The actual pill/box inside each cell — THIS gives the curvy Excel feel */
+.sub-inner {
+  border-radius: 10px;
+  padding: 11px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-height: 52px;
+}
+
+.sub-inner::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0; height:42%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.13), transparent);
+  border-radius:10px 10px 0 0;
+  pointer-events:none;
+}
+
+.sub-code {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.3px;
+}
+.sub-name {
+  font-size: 8.5px;
+  font-weight: 500;
+  opacity: 0.78;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+/* Subject color themes */
+.emf-c  { background: linear-gradient(145deg, #059669, #10b981); box-shadow: 0 2px 8px rgba(16,185,129,0.28), inset 0 1px 0 rgba(255,255,255,0.15); border: 1px solid rgba(16,185,129,0.4); }
+.dsp-c  { background: linear-gradient(145deg, #4338ca, #6366f1); box-shadow: 0 2px 8px rgba(99,102,241,0.28), inset 0 1px 0 rgba(255,255,255,0.15); border: 1px solid rgba(99,102,241,0.4); }
+.adc-c  { background: linear-gradient(145deg, #d97706, #f59e0b); box-shadow: 0 2px 8px rgba(245,158,11,0.28), inset 0 1px 0 rgba(255,255,255,0.15); border: 1px solid rgba(245,158,11,0.4); }
+.dc-c   { background: linear-gradient(145deg, #dc2626, #ef4444); box-shadow: 0 2px 8px rgba(239,68,68,0.28),  inset 0 1px 0 rgba(255,255,255,0.15); border: 1px solid rgba(239,68,68,0.4); }
+.java-c { background: linear-gradient(145deg, #be185d, #ec4899); box-shadow: 0 2px 8px rgba(236,72,153,0.28), inset 0 1px 0 rgba(255,255,255,0.15); border: 1px solid rgba(236,72,153,0.4); }
+.mpmc-c { background: linear-gradient(145deg, #0284c7, #0ea5e9); box-shadow: 0 2px 8px rgba(14,165,233,0.28), inset 0 1px 0 rgba(255,255,255,0.15); border: 1px solid rgba(14,165,233,0.4); }
+.lab-c  { background: linear-gradient(145deg, #7c3aed, #a855f7); box-shadow: 0 2px 8px rgba(168,85,247,0.28), inset 0 1px 0 rgba(255,255,255,0.15); border: 1px solid rgba(168,85,247,0.4); }
+.oth-c  { background: linear-gradient(145deg, #374151, #4b5563); box-shadow: 0 2px 8px rgba(0,0,0,0.18),      inset 0 1px 0 rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); }
+.act-c  { background: linear-gradient(145deg, #c2410c, #f97316); box-shadow: 0 2px 8px rgba(249,115,22,0.28), inset 0 1px 0 rgba(255,255,255,0.15); border: 1px solid rgba(249,115,22,0.4); }
+.free-c { background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1); color: var(--txt3); box-shadow: none; }
+
+/* ── Legend ── */
+.legend-section {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.legend-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--txt3);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 4px 10px 4px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--txt2);
+  transition: border-color 0.15s ease, color 0.15s ease;
+  cursor: default;
+}
+.leg-item:hover { border-color: var(--border2); color: var(--txt); }
+
+.leg-swatch {
+  width: 8px; height: 8px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Footer ── */
+.footer-row {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+  flex-wrap: wrap;
+  gap: 8px;
+  animation: fadeUp 1s both 0.5s;
+}
+
+.footer-left {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--txt3);
+}
+.footer-left strong { color: var(--txt2); }
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--txt3);
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .page { padding: 20px 14px 0; }
+  .topbar { padding: 0 16px; }
+  .page-title { font-size: 20px; }
+  #topdate { display: none; }
+}
+
+/* ── Entry animations per row ── */
+tbody tr {
+  animation: rowIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+}
+tbody tr:nth-child(1) { animation-delay: 0.28s; }
+tbody tr:nth-child(2) { animation-delay: 0.36s; }
+tbody tr:nth-child(3) { animation-delay: 0.44s; }
+tbody tr:nth-child(4) { animation-delay: 0.52s; }
+tbody tr:nth-child(5) { animation-delay: 0.60s; }
+tbody tr:nth-child(6) { animation-delay: 0.68s; }
+
+@keyframes rowIn {
+  from { opacity:0; transform:translateX(-12px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+
+/* Hover tooltip on subject */
+td.sub:hover::after {
+  content: attr(data-full);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15,20,40,0.95);
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--txt);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 50;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  letter-spacing: 0.2px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- Top Navigation Bar -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="app-logo">📡</div>
+    <div class="app-name">ECE Dept <span>/ Section A</span></div>
+  </div>
+  <div class="topbar-right">
+    <span id="topdate">Mon, March 07</span>
+    <div class="clock-pill">
+      <span class="clock-dot"></span>
+      <span id="topclock">9:41 AM</span>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="breadcrumb">
+      <span>Electronics & Communication Engineering</span>
+      <span class="sep">›</span>
+      <span>Section A</span>
+      <span class="sep">›</span>
+      <span style="color:var(--txt2)">Weekly Timetable</span>
+    </div>
+    <div class="page-title">
+      Weekly Class Schedule
+      <span class="badge-dept">ECE — A</span>
+    </div>
+    <div class="page-meta">
+      <div class="meta-item">📅 Academic Year 2024–25</div>
+      <div class="meta-dot"></div>
+      <div class="meta-item">📚 7 Periods / Day</div>
+      <div class="meta-dot"></div>
+      <div class="meta-item">🏛 Mon – Sat</div>
+      <div class="meta-dot"></div>
+      <div class="meta-item">⏰ 9:00 AM – 3:50 PM</div>
+    </div>
+    <div class="today-banner" id="todayBanner" style="display:none">
+      <span class="today-icon">📍</span>
+      <span id="todayMsg">Today is Monday — check your highlighted row below.</span>
+    </div>
+  </div>
+
+
+
+  <!-- Timetable -->
+  <div class="tt-container">
+    <div class="tt-toolbar">
+      <div class="tt-toolbar-left">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity:0.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Class Timetable — Weekly View
+      </div>
+      <div class="tt-toolbar-right">
+        <span class="chip">2024–25</span>
+        <span class="chip">Odd Semester</span>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <colgroup>
+          <col style="width:120px">
+          <col><col><col><col><col><col><col>
+        </colgroup>
+        <thead>
+          <tr>
+            <th>
+              <div class="th-inner">
+                <span class="th-day-label">Day / Period</span>
+              </div>
+            </th>
+            <th>
+              <div class="th-inner">
+                <span class="th-period-num">I</span>
+                <span class="th-period-time">9:00 – 9:50</span>
+              </div>
+            </th>
+            <th>
+              <div class="th-inner">
+                <span class="th-period-num">II</span>
+                <span class="th-period-time">9:50 – 10:40</span>
+              </div>
+            </th>
+            <th>
+              <div class="th-inner">
+                <span class="th-period-num">III</span>
+                <span class="th-period-time">10:50 – 11:40</span>
+              </div>
+            </th>
+            <th>
+              <div class="th-inner">
+                <span class="th-period-num">IV</span>
+                <span class="th-period-time">11:40 – 12:30</span>
+              </div>
+            </th>
+            <th>
+              <div class="th-inner">
+                <span class="th-period-num">V</span>
+                <span class="th-period-time">1:20 – 2:10</span>
+              </div>
+            </th>
+            <th>
+              <div class="th-inner">
+                <span class="th-period-num">VI</span>
+                <span class="th-period-time">2:10 – 3:00</span>
+              </div>
+            </th>
+            <th>
+              <div class="th-inner">
+                <span class="th-period-num">VII</span>
+                <span class="th-period-time">3:00 – 3:50</span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Monday -->
+          <tr data-day="1">
+            <td class="day-cell">
+              <div class="day-inner">
+                <span class="day-name">Monday</span>
+                <span class="day-short">MON</span>
+              </div>
+            </td>
+            <td class="sub" data-full="Electromagnetic Fields">
+              <div class="sub-inner emf-c"><span class="sub-code">EMF</span><span class="sub-name">Electro. Fields</span></div>
+            </td>
+            <td class="sub" data-full="Electromagnetic Fields">
+              <div class="sub-inner emf-c"><span class="sub-code">EMF</span><span class="sub-name">Electro. Fields</span></div>
+            </td>
+            <td class="sub" data-full="Digital Signal Processing">
+              <div class="sub-inner dsp-c"><span class="sub-code">DSP</span><span class="sub-name">Signal Processing</span></div>
+            </td>
+            <td class="sub" data-full="DSP Laboratory">
+              <div class="sub-inner lab-c"><span class="sub-code">DSP LAB</span><span class="sub-name">Laboratory</span></div>
+            </td>
+            <td class="sub" data-full="Open Elective">
+              <div class="sub-inner oth-c"><span class="sub-code">OE</span><span class="sub-name">Open Elective</span></div>
+            </td>
+            <td class="sub" data-full="Java Programming">
+              <div class="sub-inner java-c"><span class="sub-code">JAVA</span><span class="sub-name">Programming</span></div>
+            </td>
+            <td class="sub" data-full="Microprocessors & Microcontrollers">
+              <div class="sub-inner mpmc-c"><span class="sub-code">MPMC</span><span class="sub-name">Microprocessors</span></div>
+            </td>
+          </tr>
+
+          <!-- Tuesday -->
+          <tr data-day="2">
+            <td class="day-cell">
+              <div class="day-inner">
+                <span class="day-name">Tuesday</span>
+                <span class="day-short">TUE</span>
+              </div>
+            </td>
+            <td class="sub" data-full="Digital Signal Processing">
+              <div class="sub-inner dsp-c"><span class="sub-code">DSP</span><span class="sub-name">Signal Processing</span></div>
+            </td>
+            <td class="sub" data-full="Digital Signal Processing">
+              <div class="sub-inner dsp-c"><span class="sub-code">DSP</span><span class="sub-name">Signal Processing</span></div>
+            </td>
+            <td class="sub" data-full="Analog & Digital Circuits">
+              <div class="sub-inner adc-c"><span class="sub-code">ADC</span><span class="sub-name">Analog & Digital</span></div>
+            </td>
+            <td class="sub" data-full="ADC Laboratory">
+              <div class="sub-inner lab-c"><span class="sub-code">ADC LAB</span><span class="sub-name">Laboratory</span></div>
+            </td>
+            <td class="sub" data-full="Digital Communications">
+              <div class="sub-inner dc-c"><span class="sub-code">DC</span><span class="sub-name">Digital Comm.</span></div>
+            </td>
+            <td class="sub" data-full="Electromagnetic Fields">
+              <div class="sub-inner emf-c"><span class="sub-code">EMF</span><span class="sub-name">Electro. Fields</span></div>
+            </td>
+            <td class="sub" data-full="Management & Indian Heritage">
+              <div class="sub-inner oth-c"><span class="sub-code">MIH</span><span class="sub-name">Mgmt & Heritage</span></div>
+            </td>
+          </tr>
+
+          <!-- Wednesday -->
+          <tr data-day="3">
+            <td class="day-cell">
+              <div class="day-inner">
+                <span class="day-name">Wednesday</span>
+                <span class="day-short">WED</span>
+              </div>
+            </td>
+            <td class="sub" data-full="Microprocessors & Microcontrollers">
+              <div class="sub-inner mpmc-c"><span class="sub-code">MPMC</span><span class="sub-name">Microprocessors</span></div>
+            </td>
+            <td class="sub" data-full="Digital Signal Processing">
+              <div class="sub-inner dsp-c"><span class="sub-code">DSP</span><span class="sub-name">Signal Processing</span></div>
+            </td>
+            <td class="sub" data-full="Digital Communications">
+              <div class="sub-inner dc-c"><span class="sub-code">DC</span><span class="sub-name">Digital Comm.</span></div>
+            </td>
+            <td class="sub" data-full="Microprocessors & Microcontrollers">
+              <div class="sub-inner mpmc-c"><span class="sub-code">MPMC</span><span class="sub-name">Microprocessors</span></div>
+            </td>
+            <td class="sub" data-full="Open Elective">
+              <div class="sub-inner oth-c"><span class="sub-code">OE</span><span class="sub-name">Open Elective</span></div>
+            </td>
+            <td class="sub" data-full="Electromagnetic Fields">
+              <div class="sub-inner emf-c"><span class="sub-code">EMF</span><span class="sub-name">Electro. Fields</span></div>
+            </td>
+            <td class="sub" data-full="Digital Signal Processing">
+              <div class="sub-inner dsp-c"><span class="sub-code">DSP</span><span class="sub-name">Signal Processing</span></div>
+            </td>
+          </tr>
+
+          <!-- Thursday -->
+          <tr data-day="4">
+            <td class="day-cell">
+              <div class="day-inner">
+                <span class="day-name">Thursday</span>
+                <span class="day-short">THU</span>
+              </div>
+            </td>
+            <td class="sub" data-full="Java Programming">
+              <div class="sub-inner java-c"><span class="sub-code">JAVA</span><span class="sub-name">Programming</span></div>
+            </td>
+            <td class="sub" data-full="Java Programming">
+              <div class="sub-inner java-c"><span class="sub-code">JAVA</span><span class="sub-name">Programming</span></div>
+            </td>
+            <td class="sub" data-full="Queuing Networks">
+              <div class="sub-inner oth-c"><span class="sub-code">QNX</span><span class="sub-name">Queuing Networks</span></div>
+            </td>
+            <td class="sub" data-full="Queuing Networks">
+              <div class="sub-inner oth-c"><span class="sub-code">QNX</span><span class="sub-name">Queuing Networks</span></div>
+            </td>
+            <td class="sub" data-full="Microprocessors & Microcontrollers">
+              <div class="sub-inner mpmc-c"><span class="sub-code">MPMC</span><span class="sub-name">Microprocessors</span></div>
+            </td>
+            <td class="sub" data-full="Mathematics & Numerics">
+              <div class="sub-inner oth-c"><span class="sub-code">MIN</span><span class="sub-name">Math & Numerics</span></div>
+            </td>
+            <td class="sub" data-full="Mathematics & Numerics">
+              <div class="sub-inner oth-c"><span class="sub-code">MIN</span><span class="sub-name">Math & Numerics</span></div>
+            </td>
+          </tr>
+
+          <!-- Friday -->
+          <tr data-day="5">
+            <td class="day-cell">
+              <div class="day-inner">
+                <span class="day-name">Friday</span>
+                <span class="day-short">FRI</span>
+              </div>
+            </td>
+            <td class="sub" data-full="Digital Communications">
+              <div class="sub-inner dc-c"><span class="sub-code">DC</span><span class="sub-name">Digital Comm.</span></div>
+            </td>
+            <td class="sub" data-full="Mathematics & Numerics">
+              <div class="sub-inner oth-c"><span class="sub-code">MIN</span><span class="sub-name">Math & Numerics</span></div>
+            </td>
+            <td class="sub" data-full="Java Programming">
+              <div class="sub-inner java-c"><span class="sub-code">JAVA</span><span class="sub-name">Programming</span></div>
+            </td>
+            <td class="sub" data-full="Digital Signal Processing">
+              <div class="sub-inner dsp-c"><span class="sub-code">DSP</span><span class="sub-name">Signal Processing</span></div>
+            </td>
+            <td class="sub" data-full="Open Elective">
+              <div class="sub-inner oth-c"><span class="sub-code">OE</span><span class="sub-name">Open Elective</span></div>
+            </td>
+            <td class="sub" data-full="Java Laboratory">
+              <div class="sub-inner lab-c"><span class="sub-code">JAVA LAB</span><span class="sub-name">Laboratory</span></div>
+            </td>
+            <td class="sub" data-full="Java Laboratory">
+              <div class="sub-inner lab-c"><span class="sub-code">JAVA LAB</span><span class="sub-name">Laboratory</span></div>
+            </td>
+          </tr>
+
+          <!-- Saturday -->
+          <tr data-day="6">
+            <td class="day-cell">
+              <div class="day-inner">
+                <span class="day-name">Saturday</span>
+                <span class="day-short">SAT</span>
+              </div>
+            </td>
+            <td class="sub" data-full="Electromagnetic Fields">
+              <div class="sub-inner emf-c"><span class="sub-code">EMF</span><span class="sub-name">Electro. Fields</span></div>
+            </td>
+            <td class="sub" data-full="Electromagnetic Fields">
+              <div class="sub-inner emf-c"><span class="sub-code">EMF</span><span class="sub-name">Electro. Fields</span></div>
+            </td>
+            <td class="sub" colspan="5" data-full="Activity Period" style="padding:8px 12px;">
+              <div class="sub-inner act-c" style="border-radius:10px;padding:11px 20px;flex-direction:row;gap:8px;font-size:13px;font-weight:700;letter-spacing:1.5px;justify-content:center;">
+                <span>⚡</span> ACTIVITY PERIOD <span>⚡</span>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend-section">
+      <span class="legend-label">Legend</span>
+      <div class="leg-item"><span class="leg-swatch" style="background:#10b981"></span>EMF</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:#6366f1"></span>DSP</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:#f59e0b"></span>ADC</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:#ef4444"></span>DC</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:#ec4899"></span>JAVA</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:#0ea5e9"></span>MPMC</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:#a855f7"></span>Lab Sessions</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:#4b5563"></span>Others / Elective</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-row">
+    <div class="footer-left">
+      <strong>ECE Dept · Section A</strong> &nbsp;·&nbsp; B.E. Electronics & Communication Engineering
+    </div>
+    <div class="footer-right">
+      All times in IST &nbsp;·&nbsp; Updated 2024–25
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  const DAYS_LONG  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS     = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DAY_NAMES  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function tick(){
+    const now  = new Date();
+    const h    = now.getHours();
+    const m    = now.getMinutes();
+    const s    = now.getSeconds();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12  = h % 12 || 12;
+
+    document.getElementById('topclock').textContent =
+      `${pad(h12)}:${pad(m)}:${pad(s)} ${ampm}`;
+    document.getElementById('topdate').textContent =
+      `${DAYS_SHORT[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}`;
+  }
+
+  setInterval(tick, 1000);
+  tick();
+
+  // Highlight today
+  const today = new Date().getDay();
+  if(today >= 1 && today <= 6){
+    const row = document.querySelector(`tr[data-day="${today}"]`);
+    if(row){
+      row.classList.add('today');
+      const banner = document.getElementById('todayBanner');
+      banner.style.display = 'flex';
+      document.getElementById('todayMsg').textContent =
+        `Today is ${DAY_NAMES[today]} — your schedule is highlighted below.`;
+    }
+  }
+</script>
+</body>
+</html>
